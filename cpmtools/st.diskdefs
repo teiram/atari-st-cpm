@@ -1,0 +1,20 @@
+diskdef st68k-360
+  seclen 512
+  tracks 80
+  sectrk 9
+  blocksize 2048
+  maxdir 192
+  boottrk 5
+  os 2.2
+end
+
+diskdef st68k-720
+  seclen 512
+  tracks 160
+  sectrk 9
+  blocksize 2048
+  maxdir 192
+  boottrk 5
+  os 2.2
+end
+

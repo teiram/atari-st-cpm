@@ -1,0 +1,11 @@
+diskdef em68k
+  seclen 128
+  tracks 512
+  sectrk 256
+  blocksize 2048
+  maxdir 4096
+  skew 0
+  boottrk 1
+  os 2.2
+end
+
