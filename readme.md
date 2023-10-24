@@ -38,7 +38,7 @@ Before proceeding with the generation of CP/M, there is a BDOS routine that over
 ```
 cpmcp -f emu68k <cpmsim>/diskc.cpm.fs <repo>/bdos 3:
 ```
-Inside the cpmsim emulator, go to the user 3 and build CPMLIB as follows:
+Start the cpmsim emulator, move to the user 3 and build CPMLIB as follows:
 ```
 C>user 3
 3C>make
@@ -50,8 +50,8 @@ Now you should go to the user area 5 and copy the newly generated CPMLIB:
 ```
 you can build now the bootsector and the CPM
 ```
-5C> makeboot
-5C> makest
+5C>makeboot
+5C>makest
 ```
 From your host computer you can now extract the two artifacts: bootsector and CP/M image:
 ```
@@ -62,7 +62,7 @@ You can use the included python script mkstdisk.py included in the tools folder 
 ```
 mkstdisk.py bootsec.o cpm.sys <destination-disk-name>
 ```
-but you can also use some other tools as far as you put the bootsector and the cpm.sys at the initial sectors of the disk. mkstdisk.py creates an empty disk by default but if you provide a folder, it will copy the files into the newly created disk (provided that cpmtools is available in your path) following these conventions:
+you can also use any other tool as far as you put the bootsector and the cpm.sys at the initial sectors of the disk. mkstdisk.py creates an empty disk by default but if you provide a folder, it will copy the files into the newly created disk (provided that cpmtools is available in your path) following these conventions:
 - The files in the provided folder (option -u folder) are copied to the user area 0.
 - If there are subfolders with names 1...15, the files inside those subfolders will be copied to the user areas 1...15
 
@@ -70,6 +70,7 @@ Take into account that the generated image is automatically interleaved as expec
 - Deinterlace an existing image in order to inject or extract files with cpmtools: deinterlace.py image1.st working-copy.img
 - Manipulate the working copy using cpmtools (remenber to install the proper definitions, that are also included in the cpmtools folder)
 - Interlace the image again: interlace.py working-copy.img image2.st
+mkstdisk.py also allows to create single side images (option -s) but it's not yet manipulating the bootsector to instruct the BIOS to provide the proper DPB to the BDOS when such a disk is logged.
 
 # Changelog
 - 0.4. Should support 360K and 720K disks dynamically, based on the media descriptor in the bootsector ($F0 for 720K disks and $F1 for 360K disks). The media descriptor can be found at position 21 of the bootsector.
