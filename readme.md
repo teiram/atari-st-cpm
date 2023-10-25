@@ -53,7 +53,7 @@ C>user 3
 Now you should go to the user area 5 and copy the newly generated CPMLIB:
 ```
 5C>user 5
-5C>pip cpmlib=cpmlib[3G]
+5C>pip cpmlib=cpmlib[G3]
 ```
 you can build now the bootsector and the CPM
 ```
@@ -62,8 +62,8 @@ you can build now the bootsector and the CPM
 ```
 From your host computer you can now extract the two artifacts: bootsector and CP/M image:
 ```
-cpmcp -f emu68k <cpmsim>/diskc.cpm.fs 5:cpm.sys .
-cpmcp -f emu68k <cpmsim>/diskc.cpm.fs 5:bootsec.o .
+cpmcp -f em68k <cpmsim>/diskc.cpm.fs 5:cpm.sys .
+cpmcp -f em68k <cpmsim>/diskc.cpm.fs 5:bootsec.o .
 ```
 You can use the included python script mkstdisk.py included in the tools folder to generate a disk very easily:
 ```
