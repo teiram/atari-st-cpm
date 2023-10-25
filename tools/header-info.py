@@ -11,6 +11,7 @@ def getsymbols(f, size):
 		yield (sname, stype, saddr)
 
 showsymbols = False
+showrelocinfo = True
 
 opt, args = getopt.getopt(sys.argv[1:], "u:s")
 for o, a in opt:
@@ -37,6 +38,7 @@ with open(args[0], "rb") as f:
 	
 	hassymbols = True if symsize > 0 else False
 	hasrelocinfo = True if relocinfo == 0 else False
+	headersize = 28 if magic == 0x601a else 36
 
 	print("\nHeader of: %s" % args[0])
 	print("-------------------------------------")
@@ -63,9 +65,16 @@ with open(args[0], "rb") as f:
 
 	if hassymbols and showsymbols:
 		symboladdr = textaddr + textsize + datasize if magic == 0x601a else datastart + datasize
-		headersize = 28 if magic == 0x601a else 36
 		f.seek(symboladdr + headersize)
 		print("Symbol\t\tType\tAddress")
 		print("---------------------------------")
 		for symbol in getsymbols(f, symsize):
 			print("%8s\t$%04x\t$%08x" % (symbol))
+	if hasrelocinfo and showrelocinfo:
+		relocaddr = textaddr + textsize + datasize + symsize if magic == 0x601a else datastart + datasize + symsize
+		f.seek(headersize + relocaddr)
+		relocdatasize = len(f.read())
+
+		print("Reloc data size:%8d (0x%08x)" % (relocdatasize, relocdatasize))
+		if relocdatasize < textsize + datasize:
+			print("W: Reloc data seems to be incomplete")
