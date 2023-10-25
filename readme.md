@@ -32,11 +32,18 @@ end
 ```
 Upload the files in the source code folder to the user area 5 in the cpmsim simulated harddrive. This is where all the scripts and artifacts needed to build the CP/M binary are located.
 ```
-cpmcp -f em68k <cpmsim>/diskc.cpm.fs <repo>/src 5:
+cpmcp -f em68k <cpmsim>/diskc.cpm.fs <repo>/src/* 5:
 ```
-Before proceeding with the generation of CP/M, there is a BDOS routine that overrides most of the Motorola 68000 trap handlers, including the ones to access BIOS and XBIOS. We need to patch this behavior to keep vectors for trap #13 and trap #14 untouched. Additionally we need an updated Makefile to built the CP/M library because the one distributed with cpmsim doesn't include BDOS objects:
+Before proceeding with the generation of CP/M, there is a BDOS routine that overrides most of the Motorola 68000 trap handlers, including the ones to access BIOS and XBIOS. We need to patch this behavior to keep vectors for trap #13 and trap #14 untouched. Additionally we need an updated Makefile to built the CP/M library because the one distributed with cpmsim doesn't include BDOS objects.  
+First backup the original files from inside cpmsim:
 ```
-cpmcp -f emu68k <cpmsim>/diskc.cpm.fs <repo>/bdos 3:
+C>user 3
+3C>ren make.bak=makefile
+3C>ren exceptn.bak=exceptn.s
+```
+Now copy the new versions into cpmsim simulated drive:
+```
+cpmcp -f em68k <cpmsim>/diskc.cpm.fs <repo>/bdos/* 3:
 ```
 Start the cpmsim emulator, move to the user 3 and build CPMLIB as follows:
 ```
