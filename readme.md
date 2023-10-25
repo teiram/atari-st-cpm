@@ -9,6 +9,7 @@ This is a port of the CPM68K operating system to the Atari ST computer series. I
 - cpmtools. Some useful cpmtool disk definitions.
 - tools. Some handy utilities to build st images or manipulate them
 - artifacts. The binaries for bootsector and CP/M that must be included in the disk images.
+- bdos. Needed patches for BDOS CP/M source code
 
 # Current status
 The Atari ST should boot and since we are using BIOS/XBIOS to interact with the hardware, it should work on most models. Disk read and writing is allegedly working fine, at least with the last version I didn't suffer corruption problems.
@@ -30,46 +31,48 @@ diskdef em68k
   os 2.2
 end
 ```
-Upload the files in the source code folder to the user area 5 in the cpmsim simulated harddrive. This is where all the scripts and artifacts needed to build the CP/M binary are located.
+> **&#9432;** Be advised to use cpmtools version 2.23 or newer since there are some issues in previous versions with big disks like the emulated cpmsim harddrive. For instance version 2.21 packaged in Debian or Ubuntu LTS releases
+
+- Upload the files in the source code folder to the user area 5 in the cpmsim simulated harddrive. This is where all the scripts and artifacts needed to build the CP/M binary are located.
 ```
 cpmcp -f em68k <cpmsim>/diskc.cpm.fs <repo>/src/* 5:
 ```
-Before proceeding with the generation of CP/M, there is a BDOS routine that overrides most of the Motorola 68000 trap handlers, including the ones to access BIOS and XBIOS. We need to patch this behavior to keep vectors for trap #13 and trap #14 untouched. Additionally we need an updated Makefile to built the CP/M library because the one distributed with cpmsim doesn't include BDOS objects.  
+- Before proceeding with the generation of CP/M, there is a BDOS routine that overrides most of the Motorola 68000 trap handlers, including the ones to access BIOS and XBIOS. We need to patch this behavior to keep vectors for trap #13 and trap #14 untouched. Additionally we need an updated Makefile to built the CP/M library because the one distributed with cpmsim doesn't include BDOS objects.  
 First backup the original files from inside cpmsim:
 ```
 C>user 3
 3C>ren make.bak=makefile
 3C>ren exceptn.bak=exceptn.s
 ```
-Now copy the new versions into cpmsim simulated drive:
+- Now copy the new versions into cpmsim simulated drive:
 ```
 cpmcp -f em68k <cpmsim>/diskc.cpm.fs <repo>/bdos/* 3:
 ```
-Start the cpmsim emulator, move to the user 3 and build CPMLIB as follows:
+- Start the cpmsim emulator, move to the user 3 and build CPMLIB as follows:
 ```
 C>user 3
 3C>make
 ```
-Now you should go to the user area 5 and copy the newly generated CPMLIB:
+- Now you should go to the user area 5 and copy the newly generated CPMLIB:
 ```
 5C>user 5
 5C>pip cpmlib=cpmlib[G3]
 ```
-you can build now the bootsector and the CPM
+- Build now the bootsector and the CPM
 ```
 5C>makeboot
 5C>makest
 ```
-From your host computer you can now extract the two artifacts: bootsector and CP/M image:
+- From your host computer extract the two artifacts: bootsector and CP/M image:
 ```
 cpmcp -f em68k <cpmsim>/diskc.cpm.fs 5:cpm.sys .
 cpmcp -f em68k <cpmsim>/diskc.cpm.fs 5:bootsec.o .
 ```
-You can use the included python script mkstdisk.py included in the tools folder to generate a disk very easily:
+- You can use the included python script mkstdisk.py included in the tools folder to generate a disk very easily:
 ```
 mkstdisk.py bootsec.o cpm.sys <destination-disk-name>
 ```
-you can also use any other tool as far as you put the bootsector and the cpm.sys at the initial sectors of the disk. mkstdisk.py creates an empty disk by default but if you provide a folder, it will copy the files into the newly created disk (provided that cpmtools is available in your path) following these conventions:
+ you can also use any other tool as far as you put the bootsector and the cpm.sys at the initial sectors of the disk. mkstdisk.py creates an empty disk by default but if you provide a folder, it will copy the files into the newly created disk (provided that cpmtools is available in your path) following these conventions:
 - The files in the provided folder (option -u folder) are copied to the user area 0.
 - If there are subfolders with names 1...15, the files inside those subfolders will be copied to the user areas 1...15
 
