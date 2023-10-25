@@ -67,11 +67,32 @@ you can also use any other tool as far as you put the bootsector and the cpm.sys
 - If there are subfolders with names 1...15, the files inside those subfolders will be copied to the user areas 1...15
 
 Take into account that the generated image is automatically interleaved as expected of a st double sided image, therefore it is not possible to modify it directly with cpmtools, which can only read/write images with the two sides one after the other. To workaround this issue, there are two scripts in the tools directory to flatten or interleave the image again, so that it can be manipulated with cpmtools and interleaved again afterwards. These tools are named interlace.py and deinterlace.py and the typical workflow would be:
-- Deinterlace an existing image in order to inject or extract files with cpmtools: deinterlace.py image1.st working-copy.img
+- Deinterlace an existing image in order to inject or extract files with cpmtools: ```deinterlace.py image1.st working-copy.img```
 - Manipulate the working copy using cpmtools (remenber to install the proper definitions, that are also included in the cpmtools folder)
-- Interlace the image again: interlace.py working-copy.img image2.st
-mkstdisk.py also allows to create single side images (option -s) but it's not yet manipulating the bootsector to instruct the BIOS to provide the proper DPB to the BDOS when such a disk is logged.
+- Interlace the image again: ```interlace.py working-copy.img image2.st```  
+mkstdisk.py also allows to create single side images (option -s) but it's not yet manipulating the bootsector to instruct the BIOS to provide the proper DPB to the BDOS when such a disk is logged.  
+In order to manipulate the image with cpmtools you need the disk definitions in the cpmtools folder:
+```
+diskdef st68k-360
+  seclen 512
+  tracks 80
+  sectrk 9
+  blocksize 2048
+  maxdir 192
+  boottrk 5
+  os 2.2
+end
 
+diskdef st68k-720
+  seclen 512
+  tracks 160
+  sectrk 9
+  blocksize 2048
+  maxdir 192
+  boottrk 5
+  os 2.2
+end
+```
 # Changelog
 - 0.4. Should support 360K and 720K disks dynamically, based on the media descriptor in the bootsector ($F0 for 720K disks and $F1 for 360K disks). The media descriptor can be found at position 21 of the bootsector.
 - 0.3. Disk caching system refactored to cache a complete track. Seems to be faster.
