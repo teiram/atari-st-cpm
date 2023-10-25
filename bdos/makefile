@@ -2,10 +2,9 @@ cpmlib: ccpif.o except10.o ccpbdos.o ccpload.o bdosif.o conbdos.o bdosmisc.o\
         dskutil.o fileio.o bdosrw.o bdosmain.o iosys.o pgmld.o except.o\
         filetyps.o stack.o ccp.o
 	era cpmlib
-	ar68 r cpmlib ccpif.o except10.o ccpbdos.o ccpload.o bdosif.o
+	ar68 r cpmlib ccpif.o except10.o ccpbdos.o ccpload.o ccp.o bdosif.o
 	ar68 r cpmlib conbdos.o bdosmisc.o dskutil.o fileio.o bdosrw.o
 	ar68 r cpmlib bdosmain.o iosys.o pgmld.o except.o filetyps.o stack.o
-	ar68 r cpmlib cppload.o ccp.o
 
 ccpif.o: ccpif.s
 	as68 -s 0c: -l -u ccpif.s
