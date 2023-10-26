@@ -35,6 +35,7 @@
 	.globl	_autost,_usercmd
 
 CON			.equ	2
+TPASTART		.equ	$2000
 
 	.text
 
@@ -406,39 +407,61 @@ prtstr:
 	rts
 
 inittpa:
-*	pea		memrgn
-*	move.w		#0, -(sp)
-*	trap		#13
-*	addq.l		#6, sp
-
 	lea		memrgn, a0		* pointer to memory region table
 	move.w		#1, (a0)+		* one region
-	move.l		#$a84e, (a0)+		* Skip ST system vars
-	move.l		#cpm-$1400, d0 		* ends 4K below CPM
+	move.l		#TPASTART, (a0)+	* TPA Start
+	move.l		#cpm, d0 		* CPM Start
+	sub.l		#TPASTART, d0		* Substract the start of the TPA
+	sub.l		#$1400, d0
 	move.l		d0, (a0)
 
-	move.w		#10, d1			* divide size by 1024
+	move.w		#10, d1			* divide size by 1024 to show
 	lsr.l		d1, d0
-	lea		tpamsg+10, a0		* convert size to ASCII string
-tloop:	
+	lea		tpasizem, a0
+	bsr		num2dec
+	lea		tpaaddrm, a0
+	move.l		#TPASTART, d0
+	bsr		num2hex
+	rts
+
+num2dec:
 	divu		#10, d0
 	swap		d0
-	add.b		#$30, d0		* add '0' to convert
+	add.b		#'0', d0
 	move.b		d0, -(a0)
 	clr.w		d0
 	swap		d0
 	tst.w		d0
-	bne		tloop
+	bne		num2dec
 	rts
 
+num2hex:
+	move.b		d0, d1
+	andi		#$f, d1
+	cmp.b		#9, d1
+	ble		offsetn
+	add.b		#'A'-10, d1
+	bra		puth
+offsetn:
+	add.b		#'0', d1
+puth:
+	move.b		d1, -(a0)
+	lsr.l		#4, d0
+	tst.l		d0
+	bne		num2hex
+	rts
 
 	.data
 initmsg:
 	.dc.b   'CP/M-68K(tm) Version 1.2 03/20/84', 13, 10
 	.dc.b   'Copyright (c) 1984 Digital Research, Inc.', 13, 10
-	.dc.b	'Atari ST BIOS Version 0.4', 13, 10
-tpamsg:
-	.dc.b	'TPA =       K',13, 10, 0
+	.dc.b	'Atari ST BIOS Version 0.5-rc0', 13, 10
+	.dc.b	'TPA starts at $00000000'
+tpaaddrm:
+	.dc.b	13, 10
+	.dc.b	'TPA size =        '
+tpasizem:
+	.dc.b	' KB', 13, 10, 0
 
 drive:		.dc.w	0
 track:		.dc.w	0
