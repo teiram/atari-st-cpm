@@ -34,8 +34,11 @@
 	.globl	cpm
 	.globl	_autost,_usercmd
 
+* Just for testing
+	.globl	memrgn
+
 CON			.equ	2
-TPASTART		.equ	$2000
+TPASTART		.equ	$8000
 
 	.text
 
@@ -45,7 +48,7 @@ _init:
 	move.l		#initmsg,a1		* issue logon message
 	bsr		prtstr
 
-	move.l		#0, d0			* log on disk A, user 0
+	clr.l		d0			* log on disk A, user 0
 	rts
 
 traphndl:
@@ -412,7 +415,6 @@ inittpa:
 	move.l		#TPASTART, (a0)+	* TPA Start
 	move.l		#cpm, d0 		* CPM Start
 	sub.l		#TPASTART, d0		* Substract the start of the TPA
-	sub.l		#$1400, d0
 	move.l		d0, (a0)
 
 	move.w		#10, d1			* divide size by 1024 to show

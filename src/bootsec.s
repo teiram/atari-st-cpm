@@ -22,6 +22,9 @@
 * $26		2	Foreground color
 * $28		2	Background color
 *****************************************************************
+
+BSSOFFS			.equ	$5444
+BSSSIZ			.equ	$26f8
 	.text
 	bra.s		bootit
 oem:
@@ -54,11 +57,11 @@ nhid:
 * Custom section
 **************************************************
 ldaddr:
-	.dc.l		$70000
+	.dc.l		$60000
 ssect:
 	.dc.w		1			* Load from sector 1
 sectcnt:
-	.dc.w		42			* Sectors to load
+	.dc.w		43			* Sectors to load
 fgcolor:
 	.dc.w		$060			* Foreground color
 bgcolor:
@@ -119,6 +122,15 @@ loadcpm:
 	trap		#1
 	addq.l		#6, sp
 	move.l		ldaddr(pc), a0
+
+	movea.l		a0, a1
+	add.l		#BSSOFFS, a1
+	clr.l		d0
+	move.w		#BSSSIZ, d0
+cloop:
+	clr.b		(a1)+
+	dbra		d0, cloop
+
 	jmp		(a0)
 
 banner:
