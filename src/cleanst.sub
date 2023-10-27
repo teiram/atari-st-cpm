@@ -1,0 +1,4 @@
+era stbios.o
+era stbios.s
+era bootsec.o
+era bootsec.s
