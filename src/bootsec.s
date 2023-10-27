@@ -23,7 +23,7 @@
 * $28		2	Background color
 *****************************************************************
 
-BSSOFFS			.equ	$5444
+BSSOFFS			.equ	$593A
 BSSSIZ			.equ	$26f8
 	.text
 	bra.s		bootit
@@ -57,11 +57,11 @@ nhid:
 * Custom section
 **************************************************
 ldaddr:
-	.dc.l		$60000
+	.dc.l		$67f00
 ssect:
 	.dc.w		1			* Load from sector 1
 sectcnt:
-	.dc.w		43			* Sectors to load
+	.dc.w		45			* Sectors to load
 fgcolor:
 	.dc.w		$060			* Foreground color
 bgcolor:

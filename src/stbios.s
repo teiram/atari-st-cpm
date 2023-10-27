@@ -38,7 +38,7 @@
 	.globl	memrgn
 
 CON			.equ	2
-TPASTART		.equ	$8000
+TPASTART		.equ	$A900
 
 	.text
 
