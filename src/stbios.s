@@ -35,10 +35,10 @@
 	.globl	_autost,_usercmd
 
 * Just for testing
-	.globl	memrgn
+	.globl	memrgn,dphtab,dph0,alv0
 
 CON			.equ	2
-TPASTART		.equ	$A900
+TPASTART		.equ	$8000
 
 	.text
 
@@ -256,6 +256,12 @@ read:
 	move.w		ctrack, d0		* Check cached track
 	cmp.w		track, d0
 	beq		xferr			* Track already read
+	tst.b		dirtywr			* Do we have a pending write
+	beq		doread			* No, it's safe to read
+	bsr		stbioswr		* Do pending write
+	tst.b		d0			* Check result
+	bne		exitrd			* Exit on failure
+doread:
 	bsr		stbiosrd		* Otherwise load it
 	tst.b		d0
 	bne		exitrd			* Exit on failure
@@ -457,8 +463,8 @@ puth:
 initmsg:
 	.dc.b   'CP/M-68K(tm) Version 1.2 03/20/84', 13, 10
 	.dc.b   'Copyright (c) 1984 Digital Research, Inc.', 13, 10
-	.dc.b	'Atari ST BIOS Version 0.5-rc0', 13, 10
-	.dc.b	'TPA starts at $00000000'
+	.dc.b	27, 'b', 1, 'Atari ST BIOS Version 0.5', 27, 'b', 3, 13, 10
+	.dc.b	'TPA starts at $000000'
 tpaaddrm:
 	.dc.b	13, 10
 	.dc.b	'TPA size =        '
@@ -556,7 +562,7 @@ alv1:	.ds.b	64
 alv2:	.ds.b	1024
 alvM:	.ds.b	1024
 
-dskbuffer:					* Physical sector buffer
+dskbuffer:					* Physical track buffer
 	.ds.b	4608
 
 	.end
