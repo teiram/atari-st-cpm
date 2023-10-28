@@ -23,7 +23,7 @@
 * $28		2	Background color
 *****************************************************************
 
-BSSOFFS			.equ	$593A
+BSSOFFS			.equ	$5456
 BSSSIZ			.equ	$26f8
 	.text
 	bra.s		bootit
@@ -134,7 +134,7 @@ cloop:
 	jmp		(a0)
 
 banner:
-	.dc.b		'Atari Bootloader 0.3', 13, 10, 0
+	.dc.b		27, 'b', 1, 'Atari Bootloader 0.4', 13, 10, 27, 'b', 3, 0
 loadmsg:
 	.dc.b		'Loading CP/M-68K...', 13, 10, 0
 clsscr:
