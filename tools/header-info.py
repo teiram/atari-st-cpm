@@ -43,25 +43,34 @@ with open(args[0], "rb") as f:
 	print("\nHeader of: %s" % args[0])
 	print("-------------------------------------")
 	print("Contiguous segments: %s" % ("Yes" if magic == 0x601a else "No"))
+	print("Has reloc bits:\t%8s" % ("Yes" if relocinfo == 0 else "No"))
+
 	print("Text size: \t%8d (0x%08x)" % (textsize, textsize))
 	print("Data size: \t%8d (0x%08x)" % (datasize, datasize))
+	print("Text + Data: \t%8d (0x%08x)" % (textsize + datasize, textsize + datasize))
 	print("BSS size: \t%8d (0x%08x)" % (bsssize, bsssize))
 	print("Symbols size: \t%8d (0x%08x)" % (symsize, symsize))
 	print("Start address: \t%8d (0x%08x)" % (textaddr, textaddr))
 	if magic == 0x601a:
 		endaddr = textaddr + textsize + datasize + bsssize
 		print("End address: \t%8d (0x%08x)" % (endaddr, endaddr))
-	print("Has reloc bits:\t%8s" % ("Yes" if relocinfo == 0 else "No"))
 
 	if magic == 0x601b:
 		datastart = int.from_bytes(data[28: 32], byteorder='big')
 		bssstart = int.from_bytes(data[32: 36], byteorder='big')
-		textendaddr = textaddr + textsize
-		dataendaddr = datastart + datasize
-		bssendaddr = bssstart + bsssize
+		textendaddr = textaddr + textsize - 1
+		dataendaddr = datastart + datasize - 1
+		bssendaddr = bssstart + bsssize - 1
+	else:
+		datastart = textaddr + textsize
+		bssstart = datastart + datasize
+		dataendaddr = bssstart - 1
+		textendaddr = datastart - 1
+		bssendaddr = bssstart + bsssize - 1
 		print("Text from \t%8d (0x%08x) to %8d (0x%08x)" % (textaddr, textaddr, textendaddr, textendaddr))
 		print("Data from \t%8d (0x%08x) to %8d (0x%08x)" % (datastart, datastart, dataendaddr, dataendaddr))
 		print("BSS from \t%8d (0x%08x) to %8d (0x%08x)" % (bssstart, bssstart, bssendaddr, bssendaddr))
+
 
 	if hassymbols and showsymbols:
 		symboladdr = textaddr + textsize + datasize if magic == 0x601a else datastart + datasize
