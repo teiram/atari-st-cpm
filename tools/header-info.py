@@ -52,7 +52,7 @@ with open(args[0], "rb") as f:
 	print("Symbols size: \t%8d (0x%08x)" % (symsize, symsize))
 	print("Start address: \t%8d (0x%08x)" % (textaddr, textaddr))
 	if magic == 0x601a:
-		endaddr = textaddr + textsize + datasize + bsssize
+		endaddr = textaddr + textsize + datasize + bsssize - 1
 		print("End address: \t%8d (0x%08x)" % (endaddr, endaddr))
 
 	if magic == 0x601b:
