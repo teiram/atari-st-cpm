@@ -23,7 +23,7 @@
 * $28		2	Background color
 *****************************************************************
 
-BSSOFFS			.equ	$5456
+BSSOFFS			.equ	$545A
 BSSSIZ			.equ	$26f8
 	.text
 	bra.s		bootit

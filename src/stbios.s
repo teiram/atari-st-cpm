@@ -35,7 +35,7 @@
 	.globl	_autost,_usercmd
 
 * Just for testing
-	.globl	memrgn,dphtab,dph0,alv0
+	.globl	memrgn,dphtab,dph0,alv0,seldsk
 
 CON			.equ	2
 TPASTART		.equ	$8000
@@ -139,6 +139,7 @@ seldsk:
 	bne		islogged
 
 	move.w		d1, -(sp)		* Save candidate drive
+	move.l		a2, -(sp)		* Save DPH address
 
 	lea		dskbuffer, a1		* Buffer to read
 	move.w		#1, -(sp) 		* Sectors to read
@@ -151,6 +152,7 @@ seldsk:
 	move.w		#8, -(sp)		* XBIOS 8
 	trap		#14			* XBIOS trap
 	add.l		#20, sp			* Restore stack address
+	move.l		(sp)+, a2		* Restore 
 	move.w		(sp)+, d1		* Restore candidate drive
 
 	tst.b		d0
@@ -172,7 +174,7 @@ setdpb:
 	move.w		#$ffff, ctrack		* Invalidate cached track
 islogged:
 	move.w		d1, drive		* Set drive
-	move.l		a2, d0			* Return DPH on d0		$753B4
+	move.l		a2, d0			* Return DPH on d0
 	rts
 selerror:
 	clr.l		d0			* On error return zero on d0
