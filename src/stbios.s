@@ -23,10 +23,16 @@
 * Version 0.3.1
 * Corrected a bug in cache handling on the write implementation
 *****************************************************************
-* Version 4
+* Version 0.4
 * Support different DPBs dynamically, based on the media byte of the bootsector
 *    F0: 720Kb with 5 system tracks
 *    F1: 360Kb with 5 system track
+*****************************************************************
+* Version 0.5
+* Save and restore A2 (DPH address) in seldsk since BIOS in TOS 1.00 seems to modify it
+* Extra information during boot
+* Some symbols are temporarily declared global to help troubleshooting
+* TPA moved to $8000 so that more existing 68k binaries found around work
 *****************************************************************
 
 	.globl	_init			* bios initialization entry point
@@ -34,7 +40,11 @@
 	.globl	cpm
 	.globl	_autost,_usercmd
 
+* Just for testing
+	.globl	memrgn,dphtab,dph0,alv0,seldsk
+
 CON			.equ	2
+TPASTART		.equ	$8000
 
 	.text
 
@@ -44,7 +54,7 @@ _init:
 	move.l		#initmsg,a1		* issue logon message
 	bsr		prtstr
 
-	move.l		#0, d0			* log on disk A, user 0
+	clr.l		d0			* log on disk A, user 0
 	rts
 
 traphndl:
@@ -135,6 +145,7 @@ seldsk:
 	bne		islogged
 
 	move.w		d1, -(sp)		* Save candidate drive
+	move.l		a2, -(sp)		* Save DPH address
 
 	lea		dskbuffer, a1		* Buffer to read
 	move.w		#1, -(sp) 		* Sectors to read
@@ -147,6 +158,7 @@ seldsk:
 	move.w		#8, -(sp)		* XBIOS 8
 	trap		#14			* XBIOS trap
 	add.l		#20, sp			* Restore stack address
+	move.l		(sp)+, a2		* Restore 
 	move.w		(sp)+, d1		* Restore candidate drive
 
 	tst.b		d0
@@ -168,7 +180,7 @@ setdpb:
 	move.w		#$ffff, ctrack		* Invalidate cached track
 islogged:
 	move.w		d1, drive		* Set drive
-	move.l		a2, d0			* Return DPH on d0		$753B4
+	move.l		a2, d0			* Return DPH on d0
 	rts
 selerror:
 	clr.l		d0			* On error return zero on d0
@@ -252,6 +264,12 @@ read:
 	move.w		ctrack, d0		* Check cached track
 	cmp.w		track, d0
 	beq		xferr			* Track already read
+	tst.b		dirtywr			* Do we have a pending write
+	beq		doread			* No, it's safe to read
+	bsr		stbioswr		* Do pending write
+	tst.b		d0			* Check result
+	bne		exitrd			* Exit on failure
+doread:
 	bsr		stbiosrd		* Otherwise load it
 	tst.b		d0
 	bne		exitrd			* Exit on failure
@@ -406,39 +424,60 @@ prtstr:
 	rts
 
 inittpa:
-*	pea		memrgn
-*	move.w		#0, -(sp)
-*	trap		#13
-*	addq.l		#6, sp
-
 	lea		memrgn, a0		* pointer to memory region table
 	move.w		#1, (a0)+		* one region
-	move.l		#$a84e, (a0)+		* Skip ST system vars
-	move.l		#cpm-$1400, d0 		* ends 4K below CPM
+	move.l		#TPASTART, (a0)+	* TPA Start
+	move.l		#cpm, d0 		* CPM Start
+	sub.l		#TPASTART, d0		* Substract the start of the TPA
 	move.l		d0, (a0)
 
-	move.w		#10, d1			* divide size by 1024
+	move.w		#10, d1			* divide size by 1024 to show
 	lsr.l		d1, d0
-	lea		tpamsg+10, a0		* convert size to ASCII string
-tloop:	
+	lea		tpasizem, a0
+	bsr		num2dec
+	lea		tpaaddrm, a0
+	move.l		#TPASTART, d0
+	bsr		num2hex
+	rts
+
+num2dec:
 	divu		#10, d0
 	swap		d0
-	add.b		#$30, d0		* add '0' to convert
+	add.b		#'0', d0
 	move.b		d0, -(a0)
 	clr.w		d0
 	swap		d0
 	tst.w		d0
-	bne		tloop
+	bne		num2dec
 	rts
 
+num2hex:
+	move.b		d0, d1
+	andi		#$f, d1
+	cmp.b		#9, d1
+	ble		offsetn
+	add.b		#'A'-10, d1
+	bra		puth
+offsetn:
+	add.b		#'0', d1
+puth:
+	move.b		d1, -(a0)
+	lsr.l		#4, d0
+	tst.l		d0
+	bne		num2hex
+	rts
 
 	.data
 initmsg:
 	.dc.b   'CP/M-68K(tm) Version 1.2 03/20/84', 13, 10
 	.dc.b   'Copyright (c) 1984 Digital Research, Inc.', 13, 10
-	.dc.b	'Atari ST BIOS Version 0.4', 13, 10
-tpamsg:
-	.dc.b	'TPA =       K',13, 10, 0
+	.dc.b	27, 'b', 1, 'Atari ST BIOS Version 0.5', 27, 'b', 3, 13, 10
+	.dc.b	'TPA starts at $000000'
+tpaaddrm:
+	.dc.b	13, 10
+	.dc.b	'TPA size =        '
+tpasizem:
+	.dc.b	' KB', 13, 10, 0
 
 drive:		.dc.w	0
 track:		.dc.w	0
@@ -531,7 +570,7 @@ alv1:	.ds.b	64
 alv2:	.ds.b	1024
 alvM:	.ds.b	1024
 
-dskbuffer:					* Physical sector buffer
+dskbuffer:					* Physical track buffer
 	.ds.b	4608
 
 	.end

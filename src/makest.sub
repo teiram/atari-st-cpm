@@ -1,3 +1,4 @@
+as68 bootsec.s
 as68 stbios.s
 lo68 -r -o cpm.rel -ucpm cpmlib stbios.o
 reloc -b70000 cpm.rel cpm.sys

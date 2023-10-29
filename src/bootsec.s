@@ -22,6 +22,13 @@
 * $26		2	Foreground color
 * $28		2	Background color
 *****************************************************************
+* Version 0.4
+* Change default load address to $70000
+* Clear BSS area before jumping into CPM, maybe not needed
+*****************************************************************
+
+BSSOFFS			.equ	$545A
+BSSSIZ			.equ	$26f8
 	.text
 	bra.s		bootit
 oem:
@@ -58,7 +65,7 @@ ldaddr:
 ssect:
 	.dc.w		1			* Load from sector 1
 sectcnt:
-	.dc.w		42			* Sectors to load
+	.dc.w		45			* Sectors to load
 fgcolor:
 	.dc.w		$060			* Foreground color
 bgcolor:
@@ -119,10 +126,19 @@ loadcpm:
 	trap		#1
 	addq.l		#6, sp
 	move.l		ldaddr(pc), a0
+
+	movea.l		a0, a1
+	add.l		#BSSOFFS, a1
+	clr.l		d0
+	move.w		#BSSSIZ, d0
+cloop:
+	clr.b		(a1)+
+	dbra		d0, cloop
+
 	jmp		(a0)
 
 banner:
-	.dc.b		'Atari Bootloader 0.3', 13, 10, 0
+	.dc.b		27, 'b', 1, 'Atari Bootloader 0.4', 13, 10, 27, 'b', 3, 0
 loadmsg:
 	.dc.b		'Loading CP/M-68K...', 13, 10, 0
 clsscr:
