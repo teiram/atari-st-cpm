@@ -22,6 +22,10 @@
 * $26		2	Foreground color
 * $28		2	Background color
 *****************************************************************
+* Version 0.4
+* Change default load address to $70000
+* Clear BSS area before jumping into CPM, maybe not needed
+*****************************************************************
 
 BSSOFFS			.equ	$545A
 BSSSIZ			.equ	$26f8
@@ -57,7 +61,7 @@ nhid:
 * Custom section
 **************************************************
 ldaddr:
-	.dc.l		$67f00
+	.dc.l		$70000
 ssect:
 	.dc.w		1			* Load from sector 1
 sectcnt:
