@@ -23,10 +23,16 @@
 * Version 0.3.1
 * Corrected a bug in cache handling on the write implementation
 *****************************************************************
-* Version 4
+* Version 0.4
 * Support different DPBs dynamically, based on the media byte of the bootsector
 *    F0: 720Kb with 5 system tracks
 *    F1: 360Kb with 5 system track
+*****************************************************************
+* Version 0.5
+* Save and restore A2 (DPH address) in seldsk since BIOS in TOS 1.00 seems to modify it
+* Extra information during boot
+* Some symbols are temporarily declared global to help troubleshooting
+* TPA moved to $8000 so that more existing 68k binaries found around work
 *****************************************************************
 
 	.globl	_init			* bios initialization entry point
