@@ -1,0 +1,3 @@
+as68 ehbasic.s
+lo68 -r -o ehbasic.rel ehbasic.o
+reloc -b8000 ehbasic.rel ehbasic.68k

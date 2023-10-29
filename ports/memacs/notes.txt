@@ -1,0 +1,14 @@
+A couple of minor things had to be done to get this to compile and run
+correctly. Both bios.h and stdio.h had to be moved to where they could be
+found after being reference by #include <stdio.h>.
+
+stdio.h is nearly identical to the DRI provided version with the addition of
+lots of library function definitions at the end. Without them, some wild
+pointer references result.
+
+As a plus, it is configured out of the box to emit ANSI escape sequences
+which work perfectly with an xterm.
+
+My only complaint so far is that it does handle line wraps like real emacs
+does. Hopefully there will not be too many differences. Because emaces is 
+my editor of choice on Linux, that could be confusing.
