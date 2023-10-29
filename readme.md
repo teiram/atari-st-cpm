@@ -10,6 +10,7 @@ This is a port of the CPM68K operating system to the Atari ST computer series. I
 - tools. Some handy utilities to build st images or manipulate them
 - artifacts. The binaries for bootsector and CP/M that must be included in the disk images.
 - bdos. Needed patches for BDOS CP/M source code
+- ports. Source code of some programs adapted to run on the ST (mostly small or terminal configuration changes)
 
 # Current status
 The Atari ST should boot and since we are using BIOS/XBIOS to interact with the hardware, it should work on most models. Disk read and writing is allegedly working fine, at least with the last version I didn't suffer corruption problems.
@@ -104,6 +105,7 @@ diskdef st68k-720
 end
 ```
 # Changelog
+- 0.5. Fixes a bug in the seldsk implementation not preserving A2, that seems to be corrupted by XBIOS floppy read under TOS 1.00. TPA moved to $8000 and CPM relocated right under the screen.
 - 0.4. Should support 360K and 720K disks dynamically, based on the media descriptor in the bootsector ($F0 for 720K disks and $F1 for 360K disks). The media descriptor can be found at position 21 of the bootsector.
 - 0.3. Disk caching system refactored to cache a complete track. Seems to be faster.
 - 0.2. Some experiments with disk sector interleaving. TPA shifted to $a84e to avoid collisions with BIOS/XBIOS data (needs confirmation).
