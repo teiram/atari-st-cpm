@@ -34,6 +34,9 @@
 * Some symbols are temporarily declared global to help troubleshooting
 * TPA moved to $8000 so that more existing 68k binaries found around work
 *****************************************************************
+* Version 0.6
+* Save drive in seldsk before applying the offset for DPH calculation
+*****************************************************************
 
 	.globl	_init			* bios initialization entry point
 	.globl	_ccp			* ccp entry point
@@ -138,9 +141,10 @@ home:
 
 seldsk:
 	and		#$f, d1			* Only 15 drives possible
-	asl		#2, d1			* index into dph table
+	move.l		d1, d0
+	asl		#2, d0			* index into dph table
 	move.l		#dphtab, a1		* Load DPHTAB on A1			$75340
-	move.l		(a1, d1.w), a2		* Offset for selected drive DPH		$75380
+	move.l		(a1, d0.w), a2		* Offset for selected drive DPH		$75380
 	tst.b		d2			* Disk logged in?
 	bne		islogged
 
@@ -471,7 +475,7 @@ puth:
 initmsg:
 	.dc.b   'CP/M-68K(tm) Version 1.2 03/20/84', 13, 10
 	.dc.b   'Copyright (c) 1984 Digital Research, Inc.', 13, 10
-	.dc.b	27, 'b', 1, 'Atari ST BIOS Version 0.5', 27, 'b', 3, 13, 10
+	.dc.b	27, 'b', 1, 'Atari ST BIOS Version 0.6', 27, 'b', 3, 13, 10
 	.dc.b	'TPA starts at $000000'
 tpaaddrm:
 	.dc.b	13, 10
